@@ -57,16 +57,19 @@ def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
 
 # ------- 2. set the directory of training dataset --------
 
+# root_dir = os.getcwd() # local에서 실행시
+root_dir = "/content/U-2-Net"  # google colab 에서 실행시 필요함.
+
 model_name = "u2net"  #'u2netp'
 
-data_dir = os.path.join(os.getcwd(), "train_data" + os.sep)
+data_dir = os.path.join(root_dir, "train_data" + os.sep)
 tra_image_dir = os.path.join("images" + os.sep)
 tra_label_dir = os.path.join("labels" + os.sep)
 
 image_ext = ".jpg"
 label_ext = ".png"
 
-model_dir = os.path.join(os.getcwd(), "saved_models", model_name + os.sep)
+model_dir = os.path.join(root_dir, "saved_models", model_name + os.sep)
 
 epoch_num = 100000
 batch_size_train = 12

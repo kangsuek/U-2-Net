@@ -59,18 +59,28 @@ def main():
     # --------- 1. get image path and name ---------
     model_name = "u2net"  # u2netp
 
-    image_dir = os.path.join(os.getcwd(), "test_data", "test_images")
+    # root_dir = os.getcwd() # local에서 실행시
+    root_dir = "/content/U-2-Net"  # google colab 에서 실행시 필요함.
+
+    print("=== 01. get image path and name ===")
+    image_dir = os.path.join(root_dir, "test_data", "test_images")
+    print(f"image_dir:{image_dir}")
+
     prediction_dir = os.path.join(
-        os.getcwd(), "test_data", model_name + "_results" + os.sep
+        root_dir, "test_data", model_name + "_results" + os.sep
     )
-    model_dir = os.path.join(
-        os.getcwd(), "saved_models", model_name, model_name + ".pth"
-    )
+    print(f"prediction_dir:{prediction_dir}")
+
+    model_dir = os.path.join(root_dir, "saved_models", model_name, model_name + ".pth")
+    print(f"model_dir:{model_dir}")
+    print("==============")
 
     img_name_list = glob.glob(image_dir + os.sep + "*")
     print(img_name_list)
+    print("==============")
 
     # --------- 2. dataloader ---------
+    print("=== 02. dataloader ===")
     # 1. dataloader
     test_salobj_dataset = SalObjDataset(
         img_name_list=img_name_list,
@@ -82,6 +92,7 @@ def main():
     )
 
     # --------- 3. model define ---------
+    print("=== 03. model define ===")
     if model_name == "u2net":
         print("...load U2NET---173.6 MB")
         net = U2NET(3, 1)
@@ -90,11 +101,13 @@ def main():
         net = U2NETP(3, 1)
     net.load_state_dict(torch.load(model_dir))
 
+    print("=== 03-1. cuda is available check ===")
     if torch.cuda.is_available():
         net.cuda()
     net.eval()
 
     # --------- 4. inference for each image ---------
+    print("=== 04. inference for each image ===")
     for i_test, data_test in enumerate(test_salobj_dataloader):
 
         print("inferencing:", img_name_list[i_test].split(os.sep)[-1])
