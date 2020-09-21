@@ -107,7 +107,7 @@ def main():
     net.eval()
 
     # --------- 4. inference for each image ---------
-    print("=== 04. inference for each image ===")
+    print("=== 04. 이미지 목록에 대한 이미지를 변환한다. ===")
     for i_test, data_test in enumerate(test_salobj_dataloader):
 
         print("inferencing:", img_name_list[i_test].split(os.sep)[-1])
@@ -132,6 +132,8 @@ def main():
         save_output(img_name_list[i_test], pred, prediction_dir)
 
         del d1, d2, d3, d4, d5, d6, d7
+
+    print("=== 변환 완료... ===")
 
 
 if __name__ == "__main__":
