@@ -1,0 +1,5 @@
+numpy
+Pillow
+scikit_image
+torch
+torchvision
