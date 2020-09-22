@@ -30,15 +30,15 @@ def main():
 
     bce_loss = nn.BCELoss(size_average=True)
 
-    def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v):
+    def muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, masks_v):
 
-        loss0 = bce_loss(d0, labels_v)
-        loss1 = bce_loss(d1, labels_v)
-        loss2 = bce_loss(d2, labels_v)
-        loss3 = bce_loss(d3, labels_v)
-        loss4 = bce_loss(d4, labels_v)
-        loss5 = bce_loss(d5, labels_v)
-        loss6 = bce_loss(d6, labels_v)
+        loss0 = bce_loss(d0, masks_v)
+        loss1 = bce_loss(d1, masks_v)
+        loss2 = bce_loss(d2, masks_v)
+        loss3 = bce_loss(d3, masks_v)
+        loss4 = bce_loss(d4, masks_v)
+        loss5 = bce_loss(d5, masks_v)
+        loss6 = bce_loss(d6, masks_v)
 
         loss = loss0 + loss1 + loss2 + loss3 + loss4 + loss5 + loss6
         print(
@@ -65,10 +65,10 @@ def main():
 
     data_dir = os.path.join(root_dir, "train_data" + os.sep)
     tra_image_dir = os.path.join("images" + os.sep)
-    tra_label_dir = os.path.join("labels" + os.sep)
+    tra_mask_dir = os.path.join("masks" + os.sep)
 
     image_ext = ".jpg"
-    label_ext = ".png"
+    mask_ext = ".png"
 
     model_dir = os.path.join(root_dir, "saved_models", model_name + os.sep)
 
@@ -90,11 +90,11 @@ def main():
         for i in range(1, len(bbb)):
             imidx = imidx + "." + bbb[i]
 
-        tra_lbl_name_list.append(data_dir + tra_label_dir + imidx + label_ext)
+        tra_lbl_name_list.append(data_dir + tra_mask_dir + imidx + mask_ext)
 
     print("---")
     print("train images: ", len(tra_img_name_list))
-    print("train labels: ", len(tra_lbl_name_list))
+    print("train masks: ", len(tra_lbl_name_list))
     print("---")
 
     train_num = len(tra_img_name_list)
@@ -141,20 +141,20 @@ def main():
             ite_num = ite_num + 1
             ite_num4val = ite_num4val + 1
 
-            inputs, labels = data["image"], data["label"]
+            inputs, masks = data["image"], data["mask"]
 
             inputs = inputs.type(torch.FloatTensor)
-            labels = labels.type(torch.FloatTensor)
+            masks = masks.type(torch.FloatTensor)
 
             # wrap them in Variable
             if torch.cuda.is_available():
-                inputs_v, labels_v = (
+                inputs_v, masks_v = (
                     Variable(inputs.cuda(), requires_grad=False),
-                    Variable(labels.cuda(), requires_grad=False),
+                    Variable(masks.cuda(), requires_grad=False),
                 )
             else:
-                inputs_v, labels_v = Variable(inputs, requires_grad=False), Variable(
-                    labels, requires_grad=False
+                inputs_v, masks_v = Variable(inputs, requires_grad=False), Variable(
+                    masks, requires_grad=False
                 )
 
             # y zero the parameter gradients
@@ -162,7 +162,7 @@ def main():
 
             # forward + backward + optimize
             d0, d1, d2, d3, d4, d5, d6 = net(inputs_v)
-            loss2, loss = muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, labels_v)
+            loss2, loss = muti_bce_loss_fusion(d0, d1, d2, d3, d4, d5, d6, masks_v)
 
             loss.backward()
             optimizer.step()
