@@ -3,3 +3,8 @@ function ClickConnect() { var buttons = document.querySelectorAll("colab-dialog.
 
 // 30분마다 출력지우기
 function CleanCurrentOutput(){ var btn = document.querySelector(".output-icon.clear_outputs_enabled.output-icon-selected[title$='현재 실행 중...'] iron-icon[command=clear-focused-or-selected-outputs]"); if(btn) { console.log("30분마다 출력 지우기"); btn.click(); } } setInterval(CleanCurrentOutput,1000*60*30);
+
+
+
+[epoch: 205/1000, batch:   708/  817, ite: 14135] train loss: 0.516677, tar: 0.058378 
+l0: 0.029921, l1: 0.030133, l2: 0.029967, l3: 0.030809, l4: 0.035116, l5: 0.049747, l6: 0.090605

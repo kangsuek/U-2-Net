@@ -72,7 +72,7 @@ label_ext = ".png"
 
 model_dir = os.path.join(root_dir, "saved_models", model_name + os.sep)
 
-epoch_num = 1000  # 10만번 training
+epoch_num = 100  # 10만번 training
 batch_size_train = 12
 batch_size_val = 1
 train_num = 0
@@ -130,7 +130,7 @@ ite_num = 0
 running_loss = 0.0
 running_tar_loss = 0.0
 ite_num4val = 0
-save_frq = 2000  # save the model every 2000 iterations
+save_frq = 800  # save the model every 2000 iterations
 
 for epoch in range(0, epoch_num):
     net.train()
