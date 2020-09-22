@@ -23,6 +23,16 @@ from data_loader import SalObjDataset
 from model import U2NET
 from model import U2NETP
 
+# tensor board연결을 위해 필요함
+from torch.utils.tensorboard import SummaryWriter
+
+# 시간정보를 활용하여 폴더 생성
+import datetime
+
+# 학습데이터의 log를 저장할 폴더 생성 (지정)
+log_dir = "logs/my_board/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+writer = SummaryWriter(log_dir)
+
 
 # ------- 1. define loss function --------
 
@@ -72,7 +82,7 @@ label_ext = ".png"
 
 model_dir = os.path.join(root_dir, "saved_models", model_name + os.sep)
 
-epoch_num = 100  # 10만번 training
+epoch_num = 5000  # 10만번 training
 batch_size_train = 12
 batch_size_val = 1
 train_num = 0
@@ -130,7 +140,7 @@ ite_num = 0
 running_loss = 0.0
 running_tar_loss = 0.0
 ite_num4val = 0
-save_frq = 800  # save the model every 2000 iterations
+save_frq = 2000  # save the model every 2000 iterations
 
 for epoch in range(0, epoch_num):
     net.train()
@@ -185,6 +195,10 @@ for epoch in range(0, epoch_num):
             )
         )
 
+        # tanser board에 로그 저장
+        writer.add_scalar("train loss", running_loss / ite_num4val, epoch + 1)
+        writer.add_scalar("tar loss", running_tar_loss / ite_num4val)
+
         if ite_num % save_frq == 0:
 
             torch.save(
@@ -202,6 +216,19 @@ for epoch in range(0, epoch_num):
             running_tar_loss = 0.0
             net.train()  # resume train
             ite_num4val = 0
+
+# training이 끝나면 저장
+torch.save(
+    net.state_dict(),
+    model_dir
+    + model_name
+    + "final_bce_itr_%d_train_%3f_tar_%3f.pth"
+    % (
+        ite_num,
+        running_loss / ite_num4val,
+        running_tar_loss / ite_num4val,
+    ),
+)
 
 
 # if __name__ == "__main__":
