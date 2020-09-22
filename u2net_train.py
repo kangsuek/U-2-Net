@@ -72,7 +72,7 @@ label_ext = ".png"
 
 model_dir = os.path.join(root_dir, "saved_models", model_name + os.sep)
 
-epoch_num = 100000  # 10만번 training
+epoch_num = 1000  # 10만번 training
 batch_size_train = 12
 batch_size_val = 1
 train_num = 0
