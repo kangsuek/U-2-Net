@@ -1,23 +1,17 @@
 import argparse
 import os
 import torch
-import torchvision
 from torch.autograd import Variable
 import torch.nn as nn
-import torch.nn.functional as F
 
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from torchvision import transforms, utils
 import torch.optim as optim
-import torchvision.transforms as standard_transforms
 
-import numpy as np
 import glob
 
-from data_loader import Rescale
 from data_loader import RescaleT
 from data_loader import RandomCrop
-from data_loader import ToTensor
 from data_loader import ToTensorLab
 from data_loader import SalObjDataset
 
@@ -27,11 +21,7 @@ from model import U2NETP
 # tensor board연결을 위해 필요함
 from torch.utils.tensorboard import SummaryWriter
 
-# 시간정보를 활용하여 폴더 생성
-import datetime
-
 # ------- 1. define loss function --------
-
 bce_loss = nn.BCELoss(size_average=True)
 
 
@@ -70,15 +60,14 @@ def training_start(pthFile_name):
     train_num = 0
     epoch = 0
 
-    # root_dir = os.getcwd()  # local에서 실행시
+    # root_dir = os.getcwd() # local에서 실행시
     root_dir = "/content/U-2-Net"  # google colab 에서 실행시 필요함.
-
-    # ------- 2. set the directory of training dataset --------
 
     # 학습데이터의 log를 저장할 폴더 생성 (지정)
     log_dir = os.path.join(root_dir, "logs/my_board/" + os.sep)
     writer = SummaryWriter(log_dir)
 
+    # ------- 2. set the directory of training dataset --------
     data_dir = os.path.join(root_dir, "train_data" + os.sep)
     tra_image_dir = os.path.join("images" + os.sep)
     tra_label_dir = os.path.join("labels" + os.sep)
@@ -124,18 +113,19 @@ def training_start(pthFile_name):
     # define the model
     if model_name == "u2net":
         model = U2NET(3, 1)
-    elif model_name == "u2netp":
-        model = U2NETP(3, 1)
     else:
-        model = U2NET(3, 1)
+        model = U2NETP(3, 1)
 
     # traing 모델을 로드해서 추가로 traing 하는 것이면
-    if not pthFile_name:
-        saved_model_dir = os.path.join(model_dir, pthFile_name + os.sep)
-        checkpoint = torch.load(saved_model_dir)
-        if not checkpoint:
+    if pthFile_name != "NONE":
+        checkpoint = torch.load(model_dir + pthFile_name)
+
+        if checkpoint["epoch"] > 0:
             model.load_state_dict(checkpoint["model_state_dict"])
             epoch = checkpoint["epoch"]
+
+            if torch.cuda.is_available():
+                model.cuda()
             # ------- 4. define optimizer --------
             print("---define optimizer...")
             optimizer = optim.Adam(
@@ -147,6 +137,8 @@ def training_start(pthFile_name):
             )
             optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         else:
+            if torch.cuda.is_available():
+                model.cuda()
             # ------- 4. define optimizer --------
             print("---define optimizer...")
             optimizer = optim.Adam(
@@ -156,9 +148,20 @@ def training_start(pthFile_name):
                 eps=1e-08,
                 weight_decay=0,
             )
+    else:
 
-    if torch.cuda.is_available():
-        model.cuda()
+        if torch.cuda.is_available():
+            model.cuda()
+
+        # ------- 4. define optimizer --------
+        print("---define optimizer...")
+        optimizer = optim.Adam(
+            model.parameters(),
+            lr=0.001,
+            betas=(0.9, 0.999),
+            eps=1e-08,
+            weight_decay=0,
+        )
 
     # ------- 5. training process --------
     print("---start training...")
@@ -246,6 +249,8 @@ def training_start(pthFile_name):
                 model.train()  # resume train
                 ite_num4val = 0
 
+        epoch = epoch + 1
+
     # training이 끝나면 저장
     torch.save(
         {
@@ -255,7 +260,7 @@ def training_start(pthFile_name):
         },
         model_dir
         + model_name
-        + "final_bce_itr_%d_train_%3f_tar_%3f.pth"
+        + "_final_bce_itr_%d_train_%3f_tar_%3f.pth"
         % (
             ite_num,
             running_loss / ite_num4val,
@@ -267,21 +272,22 @@ def training_start(pthFile_name):
 def cli():
 
     """CLI"""
-    DESCRIPTION = "U2-net training"
+    DESCRIPTION = "U2-Net training"
     ARGS_HELP = """
     Running the script:
     python3 u2net_train.py -p <pthFile_name>
 
     Explanation of args:
-    -p <pthFile_name> - 이어서 traing할 pthFile_name(선택).
+    -f <pthFile_name> - 이어서 traing할 pthFile_name(선택).
     """
     parser = argparse.ArgumentParser(description=DESCRIPTION, usage=ARGS_HELP)
     parser.add_argument(
-        "-p",
+        "-f",
         required=False,
-        help="이어서 traing할 모델path를 입력하세요.",
+        help="이어서 traing할 pth파일명을 입력하세요.",
         action="store",
         dest="pthFile_name",
+        default="NONE",
     )
 
     args = parser.parse_args()
