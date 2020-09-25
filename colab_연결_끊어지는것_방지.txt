@@ -10,3 +10,6 @@ function CleanCurrentOutput(){ var btn = document.querySelector(".output-icon.cl
 
 //텐서보드를 로드 합니다.
 %tensorboard --logdir /content/U-2-Net/logs/my_board
+
+
+https://colab.research.google.com/github/fastai/fastbook

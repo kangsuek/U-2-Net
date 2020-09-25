@@ -124,6 +124,8 @@ def training_start(pthFile_name):
             model.load_state_dict(checkpoint["model_state_dict"])
             epoch = checkpoint["epoch"]
 
+            print(f"=====> epoch:{epoch}")
+
             if torch.cuda.is_available():
                 model.cuda()
             # ------- 4. define optimizer --------
@@ -237,8 +239,9 @@ def training_start(pthFile_name):
                     },
                     model_dir
                     + model_name
-                    + "_bce_itr_%d_train_%3f_tar_%3f.pth"
+                    + "_%d_bce_itr_%d_train_%3f_tar_%3f.pth"
                     % (
+                        epoch,
                         ite_num,
                         running_loss / ite_num4val,
                         running_tar_loss / ite_num4val,
@@ -260,8 +263,9 @@ def training_start(pthFile_name):
         },
         model_dir
         + model_name
-        + "_final_bce_itr_%d_train_%3f_tar_%3f.pth"
+        + "_%d_final_bce_itr_%d_train_%3f_tar_%3f.pth"
         % (
+            epoch,
             ite_num,
             running_loss / ite_num4val,
             running_tar_loss / ite_num4val,
